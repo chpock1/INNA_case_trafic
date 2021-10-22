@@ -15,9 +15,9 @@ exports.plugin = {
                     const {id}=req.params
                     const data1 = await request.requestApi('GET',id+'/full_info',[],{})
                     console.log(data1)
-                    return{err:false}
+                    return data1
                 },
-                description: 'Запросить статус ',
+                description: 'Запросить все инфу',
                 tags: ['api'],
                 validate: {
                     params: Joi.object({
@@ -27,6 +27,28 @@ exports.plugin = {
                 auth:false
             }
         });
+
+        server.route({
+            method: 'GET',
+            path: '/status/{id}',
+            config: {
+                async handler(req) {
+                    const {id}=req.params
+                    const data1 = await request.requestApi('GET',id+'/status',[],{})
+                    console.log(data1)
+                    return data1
+                },
+                description: 'Запросить статус',
+                tags: ['api'],
+                validate: {
+                    params: Joi.object({
+                        id: Joi.number().integer().min(1)
+                    })
+                },
+                auth:false
+            }
+        });
+
         server.route({
             method: 'POST',
             path: '/custom_phase_program/{id}',
@@ -48,26 +70,5 @@ exports.plugin = {
                 auth:false
             }
         });
-        server.route({
-            method: 'GET',
-            path: '/status/{id}',
-            config: {
-                async handler(req) {
-                    const {id}=req.params
-                    const data1 = await request.requestApi('GET',id+'/status',[],{})
-                    console.log(data1)
-                    return{err:false}
-                },
-                description: 'Проверка',
-                tags: ['api'],
-                validate: {
-                    params: Joi.object({
-                        id: Joi.number().integer().min(1)
-                    })
-                },
-                auth:false
-            }
-        });
-
     }
 }
