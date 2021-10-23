@@ -1,45 +1,46 @@
 <template lang="pug">
-	div(data-app)
-		div(style="height='900px'; width='900px'")
-			h1 Kарта
-			yandex-map(
-				style="width: 100%; height: 900px;"
-				ref="map"
-				:scrollZoom="true"
-				:controls="['zoomControl']"
-				:coords="setting.coords"
-				:zoom="15")
-				ymap-marker(v-for="(marker,index) in markers"
-					:coords="marker"
-					:marker-id="listTraffic[index]"
-					:icon="markerIcon"
-					@click="open_modal_info(listTraffic[index])"
-					:ref="index")
-		v-dialog.modal(v-model="modalTrafficLights")
-			v-card()
-				v-card-title Текущая фаза светофора
-				v-card-text {{text_info_modal}}
-				v-btn.addPhase(@click="openModalAddPhase(infoTraffic)") Создать фазу
-				.blockInfo
-					.dopInfo Статус:{{infoTraffic.is_enabled?'В работе':'Не работает'}}
-					.dopInfo Пройдено циклов:{{infoTraffic.t_cycle}}
-				.containrePhase
-					.blockPhase(v-for="info in infoTraffic.phases")
-						div Фаза {{info.id}}
-						div Время длительности фазы {{info.t_min+info.t_osn}} секунд
-				v-img(v-if="text_info_modal" :src="'https://via-dolorosa.ru/static/images/t1p'+text_info_modal.current_phase_id+'.png'")
-		v-dialog.modal(v-model="modalAddPhase")
-			v-card()
-				v-card-title Создать фазу
-				v-card-text
-					v-text-field(v-model="dataPhase.t_osn_one" label="Первая фаза t_osn" type="number")
-					v-text-field(v-model="dataPhase.t_osn_two" label="Вторая фаза t_osn" type="number")
-					v-text-field(v-model="dataPhase.t_osn_three" label="Третья фаза t_osn" type="number")
-					.datePicker
-						v-date-picker.backGroundDate(v-model="dataPhase.time")
-					.btnModal
-						v-btn(@click="close") Отмена
-						v-btn(@click="addPhase") Создать
+	v-app
+		div(data-app)
+			div(style="height='900px'; width='900px'")
+				h1 Kарта
+				yandex-map(
+					style="width: 100%; height: 900px;"
+					ref="map"
+					:scrollZoom="true"
+					:controls="['zoomControl']"
+					:coords="setting.coords"
+					:zoom="15")
+					ymap-marker(v-for="(marker,index) in markers"
+						:coords="marker"
+						:marker-id="listTraffic[index]"
+						:icon="markerIcon"
+						@click="open_modal_info(listTraffic[index])"
+						:ref="index")
+			v-dialog.modal(v-model="modalTrafficLights")
+				v-card()
+					v-card-title Текущая фаза светофора
+					v-card-text {{text_info_modal}}
+					v-btn.addPhase(@click="openModalAddPhase(infoTraffic)") Создать фазу
+					.blockInfo
+						.dopInfo Статус:{{infoTraffic.is_enabled?'В работе':'Не работает'}}
+						.dopInfo Пройдено циклов:{{infoTraffic.t_cycle}}
+					.containrePhase
+						.blockPhase(v-for="info in infoTraffic.phases")
+							div Фаза {{info.id}}
+							div Время длительности фазы {{info.t_min+info.t_osn}} секунд
+					v-img(v-if="text_info_modal" :src="'https://via-dolorosa.ru/static/images/t1p'+text_info_modal.current_phase_id+'.png'")
+			v-dialog.modal(v-model="modalAddPhase")
+				v-card()
+					v-card-title Создать фазу
+					v-card-text
+						v-text-field(v-model="dataPhase.t_osn_one" label="Первая фаза t_osn" type="number")
+						v-text-field(v-model="dataPhase.t_osn_two" label="Вторая фаза t_osn" type="number")
+						v-text-field(v-model="dataPhase.t_osn_three" label="Третья фаза t_osn" type="number")
+						.datePicker
+							v-time-picker.backGroundDate(v-model="dataPhase.time")
+						.btnModal
+							v-btn(@click="close") Отмена
+							v-btn(@click="addPhase") Создать
 </template>
 
 <script>
@@ -78,9 +79,9 @@
 					imageHref: 'https://via-dolorosa.ru/static/images/t1p1.png',
 					imageSize: [80,80],
 					imageOffset: [0, 0],
-					content: '123 v12',
+					content: '',
 					contentOffset: [0, 0],
-					contentLayout: '<div style="width: 50px;position: relative;left: -8px;top:40px;">test</div>',
+					contentLayout: '',
 				},
 				redTraffic:'https://cdn-icons.flaticon.com/png/512/276/premium/276337.png?token=exp=1634935255~hmac=7dcdbb0539230c830de15d6a725cd72c',
 				greenTraffic:'https://cdn-icons.flaticon.com/png/512/276/premium/276706.png?token=exp=1634935255~hmac=ab31f6f1399ba98bdd15c29a88deb289',
@@ -130,6 +131,7 @@
 			//Открытие модалки добавления фазы
 			openModalAddPhase(num){
 				this.idTraffic=num.id
+				this.modalTrafficLights=false
 				this.modalAddPhase=true
 			},
 			//Получение информации о светофоре
