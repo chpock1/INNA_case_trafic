@@ -126,6 +126,26 @@ async function awaitphase(id){//id это индекс а не значение
 async function load_front() {//функция передачи текущих данных на фронт
     return arr_for_frontend_last
 }
+
+async function program_cash(save,get,data) {//функция сохранения и получения списка программ на фронт
+    const program_cash = require(__dirname+'/program/cash.json');
+    if (save) {
+        program_cash.push(data)
+        fs.writeFile(__dirname+'/program/cash.json',JSON.stringify(program_cash), function(err){
+            if (err) console.log(err)
+        })
+        return {err:false}
+    }
+    if (get) {
+        for(i of program_cash){
+            if(i.id===data.id&&data.time<i.time) return i
+        }
+        return "Пусто"
+    }
+}
+
+// load_programs()//запуск всех программ с интервалом запросов
+
 async function detected_traffic_jam(detector_info){//поступила информация с детектора
     const plan = require('./traffic_plan/DT'+detector_info.id);//require плана для данного детектора
     const speed_metr_in_second=detector_info.speed/3.6
@@ -269,6 +289,7 @@ exports.plugin = {
                             }
                         ]
                     },{})
+                    if (data1.status==='OK') program_cash(1,0,{id, time, t_osn_one, t_osn_two, t_osn_three}) // сохранение данных
                     return data1
                 },
                 description: 'Изменение программы',
@@ -308,9 +329,12 @@ exports.plugin = {
             method: 'GET',
             path: '/lights_programs/{id}',
             config: {
-                async handler(req) {
-                    const {id}=req.params
-                    return arr_program[arr_test_id.indexOf(id)]//Ищем информацию о программе по id
+                async handler(req) {//Ищем информацию о программе по id, последние 5 аномалий, запланированные программы
+                    const {id}=req.params, time=Math.floor(new Date().getTime()/1000)
+                    const program=arr_program[arr_test_id.indexOf(id)];
+                    const last_five=(arr_anomaly[arr_test_id.indexOf(id)]).slice(Math.max((arr_anomaly[arr_test_id.indexOf(id)]).length-5,0));
+                    const plan_program=await program_cash(0,1,{id:id,time:time});
+                    return [program,last_five,plan_program]
                 },
                 description: 'получение информации о последнем состоянии светофоров',
                 validate: {
