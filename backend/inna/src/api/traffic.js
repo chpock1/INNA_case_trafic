@@ -210,7 +210,7 @@ exports.plugin = {
             config: {
                 async handler(req) {
                     const {id}=req.params
-                    return arr_program[arr_test_id.includes(id)]
+                    return arr_program[arr_test_id.indexOf(id)]
                 },
                 description: 'получение информации о последнем состоянии светофоров',
                 validate: {
