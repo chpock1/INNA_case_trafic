@@ -57,17 +57,42 @@ async function awaitphase(id){
             save(arr_test_id[id],1,id)
         }
         else {
-            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){//Если изменилась фаза с полседнего локального// сохранения, то...
-                const last_info=arr_edit[id][arr_edit[id].length-1]//из кэша достаем последние данные
-                const ping = now_date-last_info.time_update//вычисляем время за которое светофор переключился
+            const last_info=arr_edit[id][arr_edit[id].length-1]//из кэша достаем последние данные
+            const ping = now_date-last_info.time_update//вычисляем время за которое светофор переключился
+            for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
+                if(last_info.current_phase_id===i.id){
+                    const time=i.t_osn+i.t_prom//вычисляем положенное время работы фазы
+                    if((ping-time)>allow_delay_time) {//если время смены фазы больше положенного на allow_delay_time
+
+                        if(data.status_msg.nextPhaseID===last_info.current_phase_id){ //делаем запрос на экстренное переключение
+                            async function switchin(i){
+                                const emergency_switching= await request.requestApi('POST',arr_test_id[id]+'/forward_next_phase',[],{})//API запрос на телефон
+                                if(!emergency_switching&&i<2) switchin(i)
+                            }
+                            switchin(0)
+                        }
+
+                        let estimated_time=last_info.time_update.setSeconds(last_info.time_update.getSeconds() + time)//вычисляем предположительное время переключения фазы складывая предыдущее время переключения и положенное время работы фазы
+                        arr_anomaly[id].push(Object.assign(data,{time_update:now_date, ping:ping, estimated_time:estimated_time}))//пушим в массив аномалий полученные даннык
+                        save(arr_test_id[id],0,id)//локальное сохранение аномалии
+                    }
+                }
+            }
+            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){//Если изменилась фаза с полседнего локального сохранения, то сохраняем данные
                 const edit_data=Object.assign(data,{time_update:now_date, ping:ping})
                 arr_edit[id].push(
                     edit_data//пушим данные о новой фазе
                 )
                 save(arr_test_id[id],1,id)//локальное сохранение переключения
+            }
+            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.status_msg.nextPhaseID){
+
                 for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
                     if(last_info.current_phase_id===i.id){
                         const time=i.t_osn+i.t_prom//вычисляем положенное время работы фазы
+                        if((time-ping)>2){//значит переключению раньше чем должно, быть, нельзя так, вычисляем сколько ещё должно быть и плюсуем
+                            const emergency_switching= await request.requestApi('POST',arr_test_id[id] + '/continue_current_phase?phase_id='+last_info.current_phase_id+'&timeout='+(time-ping),[],{})//API запрос на телефон
+                        }
                         if((ping-time)>allow_delay_time) {//усли время смены фазы больше положенного на allow_delay_time
                             let estimated_time=last_info.time_update.setSeconds(last_info.time_update.getSeconds() + time)//вычисляем предположительное время переключения фазы складывая предыдущее время переключения и положенное время работы фазы
                             arr_anomaly[id].push(Object.assign(data,{time_update:now_date, ping:ping, estimated_time:estimated_time}))//пушим в массив аномалий полученные даннык
@@ -83,7 +108,7 @@ async function awaitphase(id){
     }
 }
 
-load_programs()
+//load_programs()//запуск всех програм с интервалом запросов
 
 exports.plugin = {
     name: 'traffic',
