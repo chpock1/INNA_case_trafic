@@ -11,7 +11,8 @@
     "core-js": "^3.6.5",
     "pug-plain-loader": "^1.1.0",
     "vue": "^2.6.11",
-    "vue-yandex-maps": "^0.11.0"
+    "vue-yandex-maps": "^0.11.0",
+    "vuetify": "^2.5.10"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
