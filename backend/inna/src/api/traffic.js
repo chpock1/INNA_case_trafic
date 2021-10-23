@@ -2,23 +2,16 @@ const Joi = require('joi');
 const request = require('./restAPI');
 const fs = require('fs');
 
-const allow_delay_time=0// количество секунд задержки при котором не будет вызвана аномалия
- //const arrLights=['2','99901','99902','99903','99904','99905','99906','99907','99908','99909','99910']
-//
-// function save(hz){
-//     fs.writeFile(__dirname+'/../config/'+hz+'.json',JSON.stringify(data), function(err){
-//         if (err) console.log(err)
-//     })
-// }
-//
-// const arrDataLights=[]
-//
-// async function func_load_now_phase() {
-//     for (let i in arrLights) {
-//         awaitphase(i)
-//     }
-// }
-//
+const allow_delay_time=5;// количество секунд задержки при котором не будет вызвана аномалия
+const arr_program=[], arr_edit=[], arr_anomaly=[];
+const arr_test_id=[2,99901,99902,99903,99904,99905,99906,99907,99908,99909,99910];
+
+function save(name,type,index){
+    const patch=(type===1?'edit':'anomaly')
+    fs.writeFile(__dirname+'/'+patch+'/'+name+'.json',type===1?JSON.stringify(arr_edit[index]):JSON.stringify(arr_anomaly[index]), function(err){
+        if (err) console.log(err)
+    })
+}
 // async function awaitphase(i){
 //     // const res= await request.requestApi('GET',arrLights[i]+'/full_info',[],{})
 //     console.log('lol', data, new Date())
@@ -33,15 +26,14 @@ const allow_delay_time=0// количество секунд задержки п
 // setInterval(()=> {
 //     func_load_now_phase()
 // },10000)
-//TODO chpock
-let arr_program=[]
-const arr_test_id=[99901,99902]
-let arr_edit=[];
-let arr_anomaly=[];
+
 for(i of arr_test_id){
+    // const arr_edit_local = require('./edit/'+i);
+    // const arr_anomaly_local = require('./anomaly/'+i);
     arr_edit.push([])
     arr_anomaly.push([])
 }
+load_programs()
 async function load_programs(){
     for (const id in arr_test_id) {
         const res_program = await request.requestApi('GET',arr_test_id[id]+'/full_info',[],{})
@@ -53,9 +45,6 @@ async function load_programs(){
         func_load_now_phase()
     },1000)
 }
-load_programs()
-
-
 
 async function func_load_now_phase() {
     for (let id in arr_test_id) {
@@ -70,28 +59,33 @@ async function awaitphase(id){
             arr_edit[id].push(
                 Object.assign(data,{time_update:now_date})
             )
+            save(arr_test_id[id],1,id)
         }
         else {
             if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){
-                console.log(arr_anomaly)
                 const last_info=arr_edit[id][arr_edit[id].length-1]
                 const ping = now_date-last_info.time_update
                 const edit_data=Object.assign(data,{time_update:now_date, ping:ping})
                 arr_edit[id].push(
                     edit_data
                 )
+                save(arr_test_id[id],1,id)
                 for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
                     if(last_info.current_phase_id===i.id){
                         const time=i.t_osn+i.t_prom//вычисляем положенное время работы фазы
                         if((ping-time)>allow_delay_time) {//усли время смены фазы больше положенного на allow_delay_time
                             let estimated_time=last_info.time_update.setSeconds(last_info.time_update.getSeconds() + time)//вычисляем предположительное время переключения фазы складывая предыдущее время переключения и положенное время работы фазы
                             arr_anomaly[id].push(Object.assign(data,{time_update:now_date, ping:ping, estimated_time:estimated_time}))//пушим в массив аномалий полученные даннык
+                            save(arr_test_id[id],0,id)
                         }
                     }
                 }
             }
         }
-    }//else anomaly
+    } else{
+        arr_anomaly[id].push({text:"Ошибка подключения", time: new Date})
+        save(arr_test_id[id],0,id)
+    }
 }
 
 
