@@ -126,8 +126,59 @@ async function awaitphase(id){//id это индекс а не значение
 async function load_front() {//функция передачи текущих данных на фронт
     return arr_for_frontend_last
 }
-
-load_programs()//запуск всех программ с интервалом запросов
+async function detected_traffic_jam(detector_info){//поступила информация с детектора
+    const plan = require('./traffic_plan/DT'+detector_info.id);//require плана для данного детектора
+    detector_info={id:1,speed:0,intensity:0};
+    const speed_metr_in_second=detector_info.speed/3.6
+    const light_count= (Object.keys(plan).length)/2
+    const max_speed=60;//максимальная скорость потока, от нее мы будем отталкиваться
+    const min_green_light=30;//предположим что для главной дороги(на которой мы отслеживаем затор) минимальная длина зеленого цвета 30 сек а
+    const max_green_light=72;// максимальная 72 при программе длиной 100 сек
+    const people_green=20;
+    const result_green_time=min_green_light+((((100-detector_info.intensity)+(max_speed/100*detector_info.speed))/2)/100*(max_green_light-min_green_light))
+    let now_date=new Date()
+    now_date.setSeconds(now_date.getSeconds() + 60);//загружаем программу через минуту
+    //Здесь мы вычисляем на сколько процентов скорость соответсвует максимальной и насколько процентов загружена дорога, находим среднее арифмитическое загруженности дороги,
+    // так как мы добавляем к светофору от 0 до 42 секунд в нашем примере, то процент из формулы будет равен проценту, который мы возьмём от числа
+    // 42(разница максимальной и минимальной длины зеленого света) и добавим к минимальной
+    let delay=0
+    for(let i=1;i++;i>light_count){//чем больше расстояние между светофорами, тем больге разница между включениями
+        delay= delay+(plan['distance'+i]/speed_metr_in_second)
+        const data1 = await request.requestApi('POST',plan['id'+i]+'/custom_phase_program', {
+            start_phase_id: 1,
+            time_start_sync: now_date.setSeconds(now_date.getSeconds() + delay).getTime(),
+            t_cycle: 100,
+            phases: [
+                {
+                    id: 1,
+                    t_osn: result_green_time-4,
+                    t_prom: 4,
+                    t_min: 4,
+                    is_hidden: false,
+                    directions: null
+                },
+                {
+                    id: 2,
+                    t_osn: 100-result_green_time-20-4,
+                    t_prom: 4,
+                    t_min: 4,
+                    is_hidden: false,
+                    directions: null
+                },
+                {
+                    id: 3,
+                    t_osn: 15,
+                    t_prom: 5,
+                    t_min: 15,
+                    is_hidden: false,
+                    directions: null
+                }
+            ]
+        },{})
+    }
+}
+//detected_traffic_jam({id:1,speed:0,intensity:0})
+//load_programs()//запуск всех программ с интервалом запросов
 
 exports.plugin = {
     name: 'traffic',
