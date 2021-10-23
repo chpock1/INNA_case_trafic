@@ -10,12 +10,12 @@
 					:controls="['zoomControl']"
 					:coords="setting.coords"
 					:zoom="15")
-					ymap-marker(v-for="(marker,index) in markers"
-						:coords="marker"
-						:marker-id="listTraffic[index]"
-						:icon="markerIcon"
-						@click="open_modal_info(listTraffic[index])"
-						:ref="index")
+					div(v-for="(marker,index) in markers")
+						ymap-marker(:coords="marker"
+							:marker-id="listTraffic[index]"
+							:icon="{layout: 'default#imageWithContent',imageHref: 'https://via-dolorosa.ru/static/images/t1p1.png',imageSize: [80,80],content: listTraffic[index].time_for_end?listTraffic[index].time_for_end:''}"
+							@click="open_modal_info(listTraffic[index])"
+							:ref="index")
 			v-dialog.modal(v-model="modalTrafficLights")
 				v-card()
 					v-card-title Текущая фаза светофора
