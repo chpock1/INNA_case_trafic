@@ -3,6 +3,8 @@ const optionsRequest={
     url:'https://api.via-dolorosa.ru/rc/'
 };
 
+/*TODO Nikolas: Подключение к API кейса*/
+
 module.exports = {
     requestApi: async (method,url,formData,headers)=>{
         const options={

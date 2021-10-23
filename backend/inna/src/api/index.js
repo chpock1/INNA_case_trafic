@@ -9,7 +9,6 @@ exports.plugin = {
             path: '/',
             config: {
                 async handler(req) {
-                    console.log(123)
                 },
                 description: 'Проверка',
                 tags: ['api']

@@ -28,12 +28,12 @@ function save(name,type,index){
 // },10000)
 
 for(i of arr_test_id){
-    // const arr_edit_local = require('./edit/'+i);
-    // const arr_anomaly_local = require('./anomaly/'+i);
-    arr_edit.push([])
-    arr_anomaly.push([])
+    const arr_edit_local = require('./edit/'+i);
+    const arr_anomaly_local = require('./anomaly/'+i);
+    arr_edit.push(arr_edit_local?arr_edit_local:[])
+    arr_anomaly.push(arr_anomaly_local?arr_anomaly_local:[])
 }
-load_programs()
+// load_programs()
 async function load_programs(){
     for (const id in arr_test_id) {
         const res_program = await request.requestApi('GET',arr_test_id[id]+'/full_info',[],{})
@@ -88,11 +88,13 @@ async function awaitphase(id){
     }
 }
 
-
 exports.plugin = {
     name: 'traffic',
     version: '0.0.1',
     register: async (server,options) => {
+
+        /*TODO Nikolas: Получение полной информации для выбранного дорожного контроллера по его идентификатору*/
+
         server.route({
             method: 'GET',
             path: '/info/{id}',
@@ -100,9 +102,7 @@ exports.plugin = {
                 async handler(req) {
                     const {id}=req.params
                     const data1 = await request.requestApi('GET',id+'/full_info',[],{})
-                    console.log(data1)
-                    if(data1)return data1
-                    if(!data1)return "err"
+                    return data1?data1:"err"
                 },
                 description: 'Запросить всю инфу',
                 tags: ['api'],
@@ -114,6 +114,8 @@ exports.plugin = {
                 auth:false
             }
         });
+
+        /*TODO Nikolas: Получение статуса контроллера по его идентификатору*/
 
         server.route({
             method: 'GET',
@@ -135,6 +137,8 @@ exports.plugin = {
                 auth:false
             }
         });
+
+        /*TODO Nikolas: Установка фазовой программы для выбранного дорожного контроллера по его идентификатору*/
 
         server.route({
             method: 'POST',
