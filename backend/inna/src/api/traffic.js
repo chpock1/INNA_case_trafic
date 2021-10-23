@@ -128,7 +128,6 @@ async function load_front() {//функция передачи текущих д
 }
 async function detected_traffic_jam(detector_info){//поступила информация с детектора
     const plan = require('./traffic_plan/DT'+detector_info.id);//require плана для данного детектора
-    detector_info={id:1,speed:0,intensity:0};
     const speed_metr_in_second=detector_info.speed/3.6
     const light_count= (Object.keys(plan).length)/2
     const max_speed=60;//максимальная скорость потока, от нее мы будем отталкиваться
@@ -141,12 +140,12 @@ async function detected_traffic_jam(detector_info){//поступила инфо
     //Здесь мы вычисляем на сколько процентов скорость соответсвует максимальной и насколько процентов загружена дорога, находим среднее арифмитическое загруженности дороги,
     // так как мы добавляем к светофору от 0 до 42 секунд в нашем примере, то процент из формулы будет равен проценту, который мы возьмём от числа
     // 42(разница максимальной и минимальной длины зеленого света) и добавим к минимальной
-    let delay=0
-    for(let i=1;i++;i>light_count){//чем больше расстояние между светофорами, тем больге разница между включениями
-        delay= delay+(plan['distance'+i]/speed_metr_in_second)
+    let delay =0
+    for(let i=1;i++;i>light_count){//чем больше расстояние между светофорами, тем больше разница между включениями
+        delay= delay+ plan['distance'+i]/speed_metr_in_second
         const data1 = await request.requestApi('POST',plan['id'+i]+'/custom_phase_program', {
             start_phase_id: 1,
-            time_start_sync: now_date.setSeconds(now_date.getSeconds() + delay).getTime(),
+            time_start_sync: now_date.getTime()+ delay-i,
             t_cycle: 100,
             phases: [
                 {
