@@ -8,41 +8,35 @@ let arr_edit=[];//все данные о кэшированных изменен
 let arr_anomaly=[];//все данные о кэшированных аномалиях
 const arr_test_id=[2,99901,99902,99903,99904,99905,99906,99907,99908,99909,99910];//Массив существующих id светофоров
 
+// var encoded = btoa(JSON.stringify(obj))
+// var actual = JSON.parse(atob(encoded))
+
 function save(name,type,index){//функция сохранения на жесткий диск
     const patch=(type===1?'edit':'anomaly')
+    if(name===99901&&type===1) {
+        fs.writeFile(__dirname+'/coding/file.txt',btoa(JSON.stringify(arr_edit[index])), function(err){
+            if (err) console.log(err)
+        })
+    }
     fs.writeFile(__dirname+'/'+patch+'/'+name+'.json',type===1?JSON.stringify(arr_edit[index]):JSON.stringify(arr_anomaly[index]), function(err){
         if (err) console.log(err)
     })
 }
-// async function awaitphase(i){
-//     // const res= await request.requestApi('GET',arrLights[i]+'/full_info',[],{})
-//     console.log('lol', data, new Date())
-//     // if(!res.code&&res.status==='OK'){
-//     // const data = require('../config/'+arrLights[i]+'')
-//     //     arrDataLights[i]=res
-//     //     console.log(arrDataLights)
-//     //     console.log(i)
-//     // }
-// }
-//
-// setInterval(()=> {
-//     func_load_now_phase()
-// },10000)
 
 for(i of arr_test_id){//Собираем данные с существующих локальных json файлов методом перебора
-    const arr_edit_local = require('./edit/'+i);
-    const arr_anomaly_local = require('./anomaly/'+i);
-    arr_edit.push(arr_edit_local?arr_edit_local:[])
-    arr_anomaly.push(arr_anomaly_local?arr_anomaly_local:[])
+    const arr_edit_local = false//require('./edit/'+i);
+    const arr_anomaly_local = false//require('./anomaly/'+i);
+    arr_edit.push(arr_edit_local?atob(arr_edit_local):[])
+    arr_anomaly.push(arr_anomaly_local?atob(arr_anomaly_local):[])
 }
 async function load_programs(){
-    for (const id in arr_test_id) {
+    for (const id in arr_test_id) {//Собираем данные текущих программ методом перебора
         const res_program = await request.requestApi('GET',arr_test_id[id]+'/full_info',[],{})
         if(res_program&&res_program.id===arr_test_id[id]){
             arr_program[id]=res_program
         }
     }
-    setInterval(()=>{
+    setInterval(()=>{//Запрашиваем информацию о фазе каждую секунду
         func_load_now_phase()
     },1000)
 }
