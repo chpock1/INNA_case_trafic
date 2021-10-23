@@ -8,7 +8,7 @@ module.exports = {
         const options={
             method: method,
             url: optionsRequest.url + encodeURI(url),
-            form:formData,
+            body:formData,
             headers:headers===undefined?{}:headers,
             json: true
         }

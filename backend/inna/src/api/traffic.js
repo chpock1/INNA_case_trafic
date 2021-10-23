@@ -1,318 +1,101 @@
 const Joi = require('joi');
 const request = require('./restAPI');
+const fs = require('fs');
 
-const arrLights=['2','99901','99902','99903','99904','99905','99906','99907','99908','99909','99910']
-const arrNikitos=[
-    {
-        "time": 1634950137,
-        "uuid": "5a603147-e201-4d45-b632-423354538971",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 3,
-        "rc_response": {
-            "uuid": "5a603147-e201-4d45-b632-423354538971",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "5a603147-e201-4d45-b632-423354538971",
-                "rc_id": 2,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 3,
-                "nextPhaseID": 3
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634949991,
-        "uuid": "0a1584d2-92e5-49b9-845a-69d476863fa9",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 3,
-        "rc_response": {
-            "uuid": "0a1584d2-92e5-49b9-845a-69d476863fa9",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "0a1584d2-92e5-49b9-845a-69d476863fa9",
-                "rc_id": 99901,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 3,
-                "nextPhaseID": 3
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950023,
-        "uuid": "8e6515d3-aa5c-4ca3-9ae5-7c2bfac4a3fe",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 1,
-        "rc_response": {
-            "uuid": "8e6515d3-aa5c-4ca3-9ae5-7c2bfac4a3fe",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "8e6515d3-aa5c-4ca3-9ae5-7c2bfac4a3fe",
-                "rc_id": 99902,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 1,
-                "nextPhaseID": 1
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950039,
-        "uuid": "dc8258b7-df34-4c73-9a0e-ba82af2e4c26",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 1,
-        "rc_response": {
-            "uuid": "dc8258b7-df34-4c73-9a0e-ba82af2e4c26",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "dc8258b7-df34-4c73-9a0e-ba82af2e4c26",
-                "rc_id": 99903,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 1,
-                "nextPhaseID": 1
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950056,
-        "uuid": "c175c900-8c42-458d-b14b-3cc3e9e6d9e4",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 2,
-        "rc_response": {
-            "uuid": "c175c900-8c42-458d-b14b-3cc3e9e6d9e4",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "c175c900-8c42-458d-b14b-3cc3e9e6d9e4",
-                "rc_id": 99904,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 2,
-                "nextPhaseID": 2
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950075,
-        "uuid": "1b65fd3e-d9a2-4705-b3c1-51cadf78680c",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 3,
-        "rc_response": {
-            "uuid": "1b65fd3e-d9a2-4705-b3c1-51cadf78680c",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "1b65fd3e-d9a2-4705-b3c1-51cadf78680c",
-                "rc_id": 99905,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 3,
-                "nextPhaseID": 3
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950094,
-        "uuid": "e09707f9-7406-4434-81d6-556a01f32632",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 3,
-        "rc_response": {
-            "uuid": "e09707f9-7406-4434-81d6-556a01f32632",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "e09707f9-7406-4434-81d6-556a01f32632",
-                "rc_id": 99906,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 3,
-                "nextPhaseID": 3
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950109,
-        "uuid": "9f186cf2-6b9d-4b8e-a9fd-64a1650bc28d",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 1,
-        "rc_response": {
-            "uuid": "9f186cf2-6b9d-4b8e-a9fd-64a1650bc28d",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "9f186cf2-6b9d-4b8e-a9fd-64a1650bc28d",
-                "rc_id": 99907,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 1,
-                "nextPhaseID": 1
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950124,
-        "uuid": "55fd734a-3ad9-4b47-bb39-97a31cb41f1d",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 1,
-        "rc_response": {
-            "uuid": "55fd734a-3ad9-4b47-bb39-97a31cb41f1d",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "55fd734a-3ad9-4b47-bb39-97a31cb41f1d",
-                "rc_id": 99908,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 1,
-                "nextPhaseID": 1
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634950137,
-        "uuid": "5a603147-e201-4d45-b632-423354538971",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 3,
-        "rc_response": {
-            "uuid": "5a603147-e201-4d45-b632-423354538971",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "5a603147-e201-4d45-b632-423354538971",
-                "rc_id": 99909,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 3,
-                "nextPhaseID": 3
-            },
-            "protocol": 1,
-            "type": 2
-        }
-    },
-    {
-        "time": 1634951037,
-        "uuid": "850f1241-870d-4045-a606-aa2fb1508e1f",
-        "status": "OK",
-        "status_rc": "OK_STATUS",
-        "status_rc_desc": "OK_STATUS",
-        "current_status": "STATUS_LOCAL",
-        "current_phase_id": 1,
-        "rc_response": {
-            "uuid": "850f1241-870d-4045-a606-aa2fb1508e1f",
-            "result": {
-                "status": 1,
-                "description": "OK_STATUS"
-            },
-            "status_msg": {
-                "uuid": "850f1241-870d-4045-a606-aa2fb1508e1f",
-                "rc_id": 99910,
-                "prevStatus": 11,
-                "nextStatus": 11,
-                "source": 3,
-                "mode": 13,
-                "prevPhaseID": 1,
-                "nextPhaseID": 1
-            },
-            "protocol": 1,
-            "type": 2
+const allow_delay_time=0// количество секунд задержки при котором не будет вызвана аномалия
+ //const arrLights=['2','99901','99902','99903','99904','99905','99906','99907','99908','99909','99910']
+//
+// function save(hz){
+//     fs.writeFile(__dirname+'/../config/'+hz+'.json',JSON.stringify(data), function(err){
+//         if (err) console.log(err)
+//     })
+// }
+//
+// const arrDataLights=[]
+//
+// async function func_load_now_phase() {
+//     for (let i in arrLights) {
+//         awaitphase(i)
+//     }
+// }
+//
+// async function awaitphase(i){
+//     // const res= await request.requestApi('GET',arrLights[i]+'/full_info',[],{})
+//     console.log('lol', data, new Date())
+//     // if(!res.code&&res.status==='OK'){
+//     // const data = require('../config/'+arrLights[i]+'')
+//     //     arrDataLights[i]=res
+//     //     console.log(arrDataLights)
+//     //     console.log(i)
+//     // }
+// }
+//
+// setInterval(()=> {
+//     func_load_now_phase()
+// },10000)
+//TODO chpock
+const arr_program=[]
+const arr_test_id=[99901,99902]
+const arr_edit=[];
+const arr_anomaly=[];
+for(i of arr_test_id){
+    arr_edit.push([])
+    arr_anomaly.push([])
+}
+async function load_programs(){
+    for (const id in arr_test_id) {
+        const res_program = await request.requestApi('GET',arr_test_id[id]+'/full_info',[],{})
+        if(res_program&&res_program.id===arr_test_id[id]){
+            arr_program[id]=res_program
         }
     }
+    setInterval(()=>{
+        func_load_now_phase()
+// console.log(arr_edit)
+    },1000)
+}
+load_programs()
 
-]
+
+
+async function func_load_now_phase() {
+    for (let id in arr_test_id) {
+        awaitphase(id)
+    }
+}
+async function awaitphase(id){
+    const data= await request.requestApi('GET',arr_test_id[id]+'/status',[],{})
+    const now_date=new Date()
+    if(!data.code&&data.status==='OK') {
+        if(arr_edit[id]&&arr_edit[id].length===0){
+            arr_edit[id].push(
+                Object.assign(data,{time_update:now_date})
+            )
+        }
+        else {
+            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){
+                console.log(arr_anomaly)
+                const last_info=arr_edit[id][arr_edit[id].length-1]
+                const ping = now_date-last_info.time_update
+                const edit_data=Object.assign(data,{time_update:now_date, ping:ping})
+                arr_edit[id].push(
+                    edit_data
+                )
+                for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
+                    if(last_info.current_phase_id===i.id){
+                        const time=i.t_osn+i.t_prom//вычисляем положенное время работы фазы
+                        if((ping-time)>allow_delay_time) {//усли время смены фазы больше положенного на allow_delay_time
+                            let estimated_time=last_info.time_update.setSeconds(last_info.time_update.getSeconds() + time)//вычисляем предположительное время переключения фазы складывая предыдущее время переключения и положенное время работы фазы
+                            arr_anomaly[id].push(Object.assign(data,{time_update:now_date, ping:ping, estimated_time:estimated_time}))//пушим в массив аномалий полученные даннык
+                        }
+                    }
+                }
+            }
+        }
+    }//else anomaly
+}
+
+
 exports.plugin = {
     name: 'traffic',
     version: '0.0.1',
@@ -325,9 +108,10 @@ exports.plugin = {
                     const {id}=req.params
                     const data1 = await request.requestApi('GET',id+'/full_info',[],{})
                     console.log(data1)
-                    return data1
+                    if(data1)return data1
+                    if(!data1)return "err"
                 },
-                description: 'Запросить все инфу',
+                description: 'Запросить всю инфу',
                 tags: ['api'],
                 validate: {
                     params: Joi.object({
@@ -365,8 +149,37 @@ exports.plugin = {
             config: {
                 async handler(req) {
                     const {id}=req.params
-
-                    const data1 = await request.requestApi('POST',id+'/forward_next_phase', {},{})
+                    const data1 = await request.requestApi('POST',id+'/custom_phase_program', {
+                            start_phase_id: 1,
+                            time_start_sync: 1634958780,
+                            t_cycle: 40,
+                            phases: [
+                            {
+                                id: 1,
+                                t_osn: 6,
+                                t_prom: 4,
+                                t_min: 4,
+                                is_hidden: false,
+                                directions: null
+                            },
+                            {
+                                id: 2,
+                                t_osn: 6,
+                                t_prom: 4,
+                                t_min: 4,
+                                is_hidden: false,
+                                directions: null
+                            },
+                            {
+                                id: 3,
+                                t_osn: 15,
+                                t_prom: 5,
+                                t_min: 15,
+                                is_hidden: false,
+                                directions: null
+                            }
+                        ]
+                    },{})
                     console.log(data1)
                     return data1
                 },
