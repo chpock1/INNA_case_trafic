@@ -1,3 +1,12 @@
 .v-dialog{
-    width: 50%;
+    width: 60%;
+}
+.theme--light.v-picker__body{
+    background: #dbdbdb;
+}
+.datePicker .v-date-picker-table .v-btn.v-btn--active{
+    color:#424242;
+}
+.datePicker .v-picker__title{
+    color:#424242;
 }
