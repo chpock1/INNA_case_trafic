@@ -34,10 +34,10 @@ const allow_delay_time=0// количество секунд задержки п
 //     func_load_now_phase()
 // },10000)
 //TODO chpock
-const arr_program=[]
+let arr_program=[]
 const arr_test_id=[99901,99902]
-const arr_edit=[];
-const arr_anomaly=[];
+let arr_edit=[];
+let arr_anomaly=[];
 for(i of arr_test_id){
     arr_edit.push([])
     arr_anomaly.push([])
@@ -51,7 +51,6 @@ async function load_programs(){
     }
     setInterval(()=>{
         func_load_now_phase()
-// console.log(arr_edit)
     },1000)
 }
 load_programs()
@@ -206,6 +205,25 @@ exports.plugin = {
                     })
                 },
                 description: 'получение информации о последнем состоянии светофоров',
+                tags: ['api'],
+                auth:false
+            }
+        });
+        //TODO chpock
+        server.route({
+            method: 'GET',
+            path: '/lights_programs/{id}',
+            config: {
+                async handler(req) {
+                    const {id}=req.params
+                    return arr_program[arr_test_id.includes(id)]
+                },
+                description: 'получение информации о последнем состоянии светофоров',
+                validate: {
+                    params: Joi.object({
+                        id: Joi.number().integer().min(1)
+                    })
+                },
                 tags: ['api'],
                 auth:false
             }
