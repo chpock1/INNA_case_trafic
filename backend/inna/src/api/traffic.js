@@ -142,7 +142,7 @@ async function detected_traffic_jam(detector_info){//поступила инфо
     // 42(разница максимальной и минимальной длины зеленого света) и добавим к минимальной
     let delay =0
     for(let i=1;i++;i>light_count){//чем больше расстояние между светофорами, тем больше разница между включениями
-        delay= delay+ plan['distance'+i]/speed_metr_in_second
+        delay= delay + Math.round(plan['distance'+i]/speed_metr_in_second)
         const data1 = await request.requestApi('POST',plan['id'+i]+'/custom_phase_program', {
             start_phase_id: 1,
             time_start_sync: now_date.getTime()+ delay-i,
