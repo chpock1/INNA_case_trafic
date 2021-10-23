@@ -1,24 +1,23 @@
-# untitled1
+# INNA_case_trafic
 
 ## Project setup
 ```
 npm install
+cd backend
+cd innd
+npm install
+
+
+## Project run
 ```
 
-### Compiles and hot-reloads for development
+## Front-End run
 ```
-npm run serve
+vue-cli-service serve
+
+## Back-End run
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+cd backend
+cd innd
+env NODE_ENV=dev node --max-old-space-size=2048 src/index.js

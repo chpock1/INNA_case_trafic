@@ -3,10 +3,12 @@ const request = require('./restAPI');
 const fs = require('fs');
 
 const allow_delay_time=5;// количество секунд задержки при котором не будет вызвана аномалия
-const arr_program=[], arr_edit=[], arr_anomaly=[];
-const arr_test_id=[2,99901,99902,99903,99904,99905,99906,99907,99908,99909,99910];
+const arr_program=[];//текущие программы всех светофоров
+let arr_edit=[];//все данные о кэшированных изменениях фаз
+let arr_anomaly=[];//все данные о кэшированных аномалиях
+const arr_test_id=[2,99901,99902,99903,99904,99905,99906,99907,99908,99909,99910];//Массив существующих id светофоров
 
-function save(name,type,index){
+function save(name,type,index){//функция сохранения на жесткий диск
     const patch=(type===1?'edit':'anomaly')
     fs.writeFile(__dirname+'/'+patch+'/'+name+'.json',type===1?JSON.stringify(arr_edit[index]):JSON.stringify(arr_anomaly[index]), function(err){
         if (err) console.log(err)
@@ -27,13 +29,12 @@ function save(name,type,index){
 //     func_load_now_phase()
 // },10000)
 
-for(i of arr_test_id){
+for(i of arr_test_id){//Собираем данные с существующих локальных json файлов методом перебора
     const arr_edit_local = require('./edit/'+i);
     const arr_anomaly_local = require('./anomaly/'+i);
     arr_edit.push(arr_edit_local?arr_edit_local:[])
     arr_anomaly.push(arr_anomaly_local?arr_anomaly_local:[])
 }
-// load_programs()
 async function load_programs(){
     for (const id in arr_test_id) {
         const res_program = await request.requestApi('GET',arr_test_id[id]+'/full_info',[],{})
@@ -52,31 +53,31 @@ async function func_load_now_phase() {
     }
 }
 async function awaitphase(id){
-    const data= await request.requestApi('GET',arr_test_id[id]+'/status',[],{})
-    const now_date=new Date()
-    if(!data.code&&data.status==='OK') {
-        if(arr_edit[id]&&arr_edit[id].length===0){
+    const data= await request.requestApi('GET',arr_test_id[id]+'/status',[],{})//API запрос на телефон
+    const now_date=new Date()//Время запроса
+    if(!data.code&&data.status==='OK') {// Проверка на наличие и правильность ответа
+        if(arr_edit[id]&&arr_edit[id].length===0){//если массив ещё пуст
             arr_edit[id].push(
-                Object.assign(data,{time_update:now_date})
+                Object.assign(data,{time_update:now_date})//пушим полученнные данные о текущей фазе
             )
             save(arr_test_id[id],1,id)
         }
         else {
-            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){
-                const last_info=arr_edit[id][arr_edit[id].length-1]
-                const ping = now_date-last_info.time_update
+            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.current_phase_id){//Если изменилась фаза с полседнего локального// сохранения, то...
+                const last_info=arr_edit[id][arr_edit[id].length-1]//из кэша достаем последние данные
+                const ping = now_date-last_info.time_update//вычисляем время за которое светофор переключился
                 const edit_data=Object.assign(data,{time_update:now_date, ping:ping})
                 arr_edit[id].push(
-                    edit_data
+                    edit_data//пушим данные о новой фазе
                 )
-                save(arr_test_id[id],1,id)
+                save(arr_test_id[id],1,id)//локальное сохранение переключения
                 for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
                     if(last_info.current_phase_id===i.id){
                         const time=i.t_osn+i.t_prom//вычисляем положенное время работы фазы
                         if((ping-time)>allow_delay_time) {//усли время смены фазы больше положенного на allow_delay_time
                             let estimated_time=last_info.time_update.setSeconds(last_info.time_update.getSeconds() + time)//вычисляем предположительное время переключения фазы складывая предыдущее время переключения и положенное время работы фазы
                             arr_anomaly[id].push(Object.assign(data,{time_update:now_date, ping:ping, estimated_time:estimated_time}))//пушим в массив аномалий полученные даннык
-                            save(arr_test_id[id],0,id)
+                            save(arr_test_id[id],0,id)//локальное сохранение аномалии
                         }
                     }
                 }
@@ -87,6 +88,8 @@ async function awaitphase(id){
         save(arr_test_id[id],0,id)
     }
 }
+
+load_programs()
 
 exports.plugin = {
     name: 'traffic',
@@ -202,9 +205,12 @@ exports.plugin = {
             path: '/lights_info',
             config: {
                 async handler() {
-                    return arrNikitos.map (item => {
+                    return arrNikitos.map (item => {//из статуса светофора отдаём только id фазы, предыдущюю и след фазу и id светофора
                         return {
-                            current_phase_id : item.current_phase_id , prevPhaseID : item.rc_response.status_msg.prevPhaseID , nextPhaseID : item.rc_response.status_msg.nextPhaseID , rc_id : item.rc_response.status_msg.rc_id
+                            current_phase_id : item.current_phase_id ,
+                            prevPhaseID : item.rc_response.status_msg.prevPhaseID ,
+                            nextPhaseID : item.rc_response.status_msg.nextPhaseID ,
+                            rc_id : item.rc_response.status_msg.rc_id
                         };
                     })
                 },
@@ -220,7 +226,7 @@ exports.plugin = {
             config: {
                 async handler(req) {
                     const {id}=req.params
-                    return arr_program[arr_test_id.indexOf(id)]
+                    return arr_program[arr_test_id.indexOf(id)]//Ищем информацию о программе по id
                 },
                 description: 'получение информации о последнем состоянии светофоров',
                 validate: {
