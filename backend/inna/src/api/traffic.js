@@ -142,14 +142,15 @@ exports.plugin = {
             config: {
                 async handler(req) {
                     const {id}=req.params
+                    const {time, t_osn_one, t_osn_two, t_osn_three}=req.payload
                     const data1 = await request.requestApi('POST',id+'/custom_phase_program', {
                             start_phase_id: 1,
-                            time_start_sync: 1634958780,
-                            t_cycle: 40,
+                            time_start_sync: time,
+                            t_cycle: 13+t_osn_one+t_osn_two+t_osn_three,
                             phases: [
                             {
                                 id: 1,
-                                t_osn: 6,
+                                t_osn: t_osn_one,
                                 t_prom: 4,
                                 t_min: 4,
                                 is_hidden: false,
@@ -157,7 +158,7 @@ exports.plugin = {
                             },
                             {
                                 id: 2,
-                                t_osn: 6,
+                                t_osn: t_osn_two,
                                 t_prom: 4,
                                 t_min: 4,
                                 is_hidden: false,
@@ -165,7 +166,7 @@ exports.plugin = {
                             },
                             {
                                 id: 3,
-                                t_osn: 15,
+                                t_osn: t_osn_three,
                                 t_prom: 5,
                                 t_min: 15,
                                 is_hidden: false,
@@ -173,14 +174,19 @@ exports.plugin = {
                             }
                         ]
                     },{})
-                    console.log(data1)
                     return data1
                 },
-                description: 'хуйня какаято ',
+                description: 'Изменение программы',
                 tags: ['api'],
                 validate: {
                     params: Joi.object({
                         id: Joi.number().integer().min(1)
+                    }),
+                    payload: Joi.object({
+                        time: Joi.number().integer().required(),
+                        t_osn_one: Joi.number().integer().min(4).required(),
+                        t_osn_two: Joi.number().integer().min(4).required(),
+                        t_osn_three: Joi.number().integer().min(15).required()
                     })
                 },
                 auth:false
