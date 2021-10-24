@@ -336,7 +336,7 @@ exports.plugin = {
                     const program=arr_program[arr_test_id.indexOf(id)];
                     const last_five=(arr_anomaly[arr_test_id.indexOf(id)]).slice(Math.max((arr_anomaly[arr_test_id.indexOf(id)]).length-5,0));
                     const plan_program=await program_cash(0,1,{id:id,time:time});
-                    return [program,last_five,plan_program]
+                    return {program : program,last_five:last_five,plan_program:plan_program}
                 },
                 description: 'получение информации о последнем состоянии светофоров',
                 validate: {
