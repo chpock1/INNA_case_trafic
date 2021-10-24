@@ -5,7 +5,6 @@
 				h1 Kарта
 				yandex-map(
 					style="width: 100%; height: 900px;"
-					ref="map"
 					:scrollZoom="true"
 					:controls="['zoomControl']"
 					:coords="setting.coords"
@@ -16,18 +15,21 @@
 							:icon="{layout: 'default#imageWithContent',imageHref: 'https://via-dolorosa.ru/static/images/t1p1.png',imageSize: [80,80],content: listTraffic[index].time_for_end?listTraffic[index].time_for_end:''}"
 							@click="open_modal_info(listTraffic[index])"
 							:ref="index")
+					div(v-for="(dt,index) in Dt")
+						ymap-marker(:coords="dt"
+							:marker-id="index"
+							:icon="{layout: 'default#imageWithContent',imageHref: 'https://cdn-icons.flaticon.com/png/128/2740/premium/2740706.png?token=exp=1635027295~hmac=2fca8ad17495721b036e487dbb3a14cc',imageSize: [80,80],content: listTraffic[index].time_for_end?listTraffic[index].time_for_end:''}"
+							@click="openModalTrafficIntensity(index)"
+							:ref="index")
 			v-dialog.modal(v-model="modalTrafficLights")
 				v-card()
 					v-card-title Текущая фаза светофора
 					v-card-text {{text_info_modal}}
 					v-btn.addPhase(@click="openModalAddPhase(infoTraffic)") Создать фазу
-					.blockInfo
-						.dopInfo Статус:{{infoTraffic.is_enabled?'В работе':'Не работает'}}
-						.dopInfo Пройдено циклов:{{infoTraffic.t_cycle}}
 					.containrePhase
-						.blockPhase(v-for="info in infoTraffic.phases")
-							div Фаза {{info.id}}
-							div Время длительности фазы {{info.t_min+info.t_osn}} секунд
+						.blockPhase(v-for="info in infoTraffic[1]")
+							div Фаза {{info.text}}
+							div Время длительности фазы {{info.time}} секунд
 					v-img(v-if="text_info_modal" :src="'https://via-dolorosa.ru/static/images/t1p'+text_info_modal.current_phase_id+'.png'")
 			v-dialog.modal(v-model="modalAddPhase")
 				v-card()
@@ -36,11 +38,19 @@
 						v-text-field(v-model="dataPhase.t_osn_one" label="Первая фаза t_osn" type="number")
 						v-text-field(v-model="dataPhase.t_osn_two" label="Вторая фаза t_osn" type="number")
 						v-text-field(v-model="dataPhase.t_osn_three" label="Третья фаза t_osn" type="number")
-						.datePicker
-							v-time-picker.backGroundDate(v-model="dataPhase.time")
+						input.inpDate(type="datetime-local")
 						.btnModal
 							v-btn(@click="close") Отмена
 							v-btn(@click="addPhase") Создать
+			v-dialog.modal(v-model="modalCamera")
+				v-card()
+					v-card-title Камера({{trafficStreet}})
+					v-card-text
+						v-text-field(v-model="trafficData.speed" label="Скорость" type="number" :counter="60")
+						v-text-field(v-model="trafficData.intensity" label="Интенсивность" type="number" :counter="100")
+						.btnModal
+							v-btn(@click="close") Отмена
+							v-btn(@click="detectedTraffic") Создать
 </template>
 
 <script>
@@ -51,6 +61,17 @@
 		name : 'INNA_maps',
 		data(){
 			return{
+				trafficData:{
+					speed:0,
+					intensity:0,
+				},
+				trafficStreet:'',
+				street:['От ул. Зеленодольская - к Жигулёвской ул.','От ул. Фёдора Полетаева - к Окскому пр-ду','От пр-та Волгоградский - к ул. Шумилова'],
+				Dt:[
+					[55.710475925472736, 37.763597551957965],
+					[55.71176359645175, 37.77577758839369],
+					[55.70828268212671, 37.768161678974764]
+				],
 				dataPhase:{
 					t_osn_one:'',
 					t_osn_two:'',
@@ -98,6 +119,8 @@
 				},
 				idTraffic:'',
 				modalAddPhase:false,
+				modalCamera:false,
+				idCamera:0,
 			}
 		},
 		computed:{
@@ -107,6 +130,22 @@
 			},
 		},
 		methods:{
+			async detectedTraffic(){
+				this.idCamera=this.idCamera+1
+				const res = await axios.get(this.server+'detected/traffic/'+this.trafficData.intensity+'/'+this.trafficData.speed+'/'+this.idCamera)
+				console.log(res)
+				if(!res.err){
+					alert('Нет ошибок')
+				}
+				else{
+					alert('Ошибка')
+				}
+			},
+			openModalTrafficIntensity(i){
+				this.trafficStreet=this.street[i]
+				this.modalCamera=true
+				this.idCamera=i
+			},
 			//Очистка данных и закрытие модального окна создания фазы
 			close(){
 				this.t_osn_one=0
@@ -137,6 +176,7 @@
 			//Получение информации о светофоре
 			async open_modal_info(e){
 				const res = await axios.get(this.server+'lights_programs/'+e)
+				console.log(res)
 				if(!res.err){
 					this.modalTrafficLights=true
 					this.infoTraffic=res.data
@@ -147,6 +187,7 @@
 			//Отправка запроса на Back-End для получения информации о светофорах
 			async checkTraffic(){
 				const res = await axios.get(this.server+'lights_info')
+				console.log(res)
 				if(res){
 					this.markersInfo=res.data
 				}
@@ -154,7 +195,7 @@
 		},
 		// Запуск функции при отрисовке компонента
 		mounted() {
-			// this.checkTraffic()
+			//setInterval(() => this.checkTraffic(), 2000);
 		}
 	};
 </script>
@@ -195,5 +236,10 @@
 	display: flex;
 	justify-content: space-around;
 	margin-top: 10px;
+}
+.inpDate{
+	width: 100%;
+	border-bottom: 1px solid #999999;
+	color:#525252;
 }
 </style>
