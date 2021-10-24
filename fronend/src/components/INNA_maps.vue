@@ -54,7 +54,7 @@
 						v-text-field(v-model="trafficData.speed" label="Скорость" type="number" :counter="60")
 						v-text-field(v-model="trafficData.intensity" label="Интенсивность" type="number" :counter="100")
 						.btnModal
-							v-btn(@click="close") Отмена
+							v-btn(@click="closeCamera") Отмена
 							v-btn(@click="detectedTraffic") Создать
 </template>
 
@@ -135,6 +135,13 @@
 			},
 		},
 		methods:{
+			closeCamera(){
+				this.modalCamera=false
+				this.trafficData={
+					speed:0,
+					intensity:0,
+				}
+			},
 			async detectedTraffic(){
 				const res = await axios.get(this.server+'detected/traffic/'+this.trafficData.intensity+'/'+this.trafficData.speed+'/'+(this.idCamera+1))
 				console.log(res)
