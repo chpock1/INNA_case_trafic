@@ -196,7 +196,7 @@ async function detected_traffic_jam(detector_info){//поступила инфо
         },{})
     }
 }
-//detected_traffic_jam({id:1,speed:0,intensity:0})
+
 //load_programs()//запуск всех программ с интервалом запросов
 
 exports.plugin = {
@@ -308,7 +308,9 @@ exports.plugin = {
                 auth:false
             }
         });
+
         //TODO chpock
+
         server.route({
             method: 'GET',
             path: '/lights_info',
@@ -324,7 +326,9 @@ exports.plugin = {
                 auth:false
             }
         });
+
         //TODO chpock
+
         server.route({
             method: 'GET',
             path: '/lights_programs/{id}',
@@ -340,6 +344,30 @@ exports.plugin = {
                 validate: {
                     params: Joi.object({
                         id: Joi.number().integer().min(1)
+                    })
+                },
+                tags: ['api'],
+                auth:false
+            }
+        });
+
+        /*TODO Nikolas: Запрос на получение интенсивности и скорости потока*/
+
+        server.route({
+            method: 'GET',
+            path: '/detected/traffic/{intensity}/{speed}/{id}',
+            config: {
+                async handler(req) {
+                    const {id,intensity,speed}=req.params;
+                    detected_traffic_jam({id:id,speed:speed,intensity:intensity})
+                    return {err:false}
+                },
+                description: 'Запрос на получение интенсивности и скорости потока',
+                validate: {
+                    params: Joi.object({
+                        id: Joi.number().integer().min(1),
+                        speed: Joi.number().integer().min(0).max(60),
+                        intensity: Joi.number().integer().min(0).max(100)
                     })
                 },
                 tags: ['api'],
