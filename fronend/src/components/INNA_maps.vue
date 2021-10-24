@@ -18,7 +18,7 @@
 					div(v-for="(dt,index) in Dt")
 						ymap-marker(:coords="dt"
 							:marker-id="index"
-							:icon="{layout: 'default#imageWithContent',imageHref: 'https://cdn-icons.flaticon.com/png/128/2740/premium/2740706.png?token=exp=1635027295~hmac=2fca8ad17495721b036e487dbb3a14cc',imageSize: [80,80],content: listTraffic[index].time_for_end?listTraffic[index].time_for_end:''}"
+							:icon="{layout: 'default#imageWithContent',imageHref: 'https://cdn-icons-png.flaticon.com/512/61/61427.png',imageSize: [65,65],content: listTraffic[index].time_for_end?listTraffic[index].time_for_end:''}"
 							@click="openModalTrafficIntensity(index)"
 							:ref="index")
 			v-dialog.modal(v-model="modalTrafficLights")
@@ -26,10 +26,11 @@
 					v-card-title Текущая фаза светофора
 					v-card-text {{text_info_modal}}
 					v-btn.addPhase(@click="openModalAddPhase(infoTraffic)") Создать фазу
-					.containrePhase
-						.blockPhase(v-for="info in infoTraffic[1]")
+					.containrePhase(v-if="infoTraffic.program")
+						.blockPhase(v-for="info in infoTraffic.program")
 							div Фаза {{info.text}}
 							div Время длительности фазы {{info.time}} секунд
+					span(v-else) Светофор не доступен
 					v-img(v-if="text_info_modal" :src="'https://via-dolorosa.ru/static/images/t1p'+text_info_modal.current_phase_id+'.png'")
 			v-dialog.modal(v-model="modalAddPhase")
 				v-card()
@@ -131,8 +132,7 @@
 		},
 		methods:{
 			async detectedTraffic(){
-				this.idCamera=this.idCamera+1
-				const res = await axios.get(this.server+'detected/traffic/'+this.trafficData.intensity+'/'+this.trafficData.speed+'/'+this.idCamera)
+				const res = await axios.get(this.server+'detected/traffic/'+this.trafficData.intensity+'/'+this.trafficData.speed+'/'+(this.idCamera+1))
 				console.log(res)
 				if(!res.err){
 					alert('Нет ошибок')
