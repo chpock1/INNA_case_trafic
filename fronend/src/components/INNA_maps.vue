@@ -31,6 +31,10 @@
 							div Фаза {{info.text}}
 							div Время длительности фазы {{info.time}} секунд
 					span(v-else) Светофор не доступен
+					.blockAnomaly
+						.err(v-for="last in infoTraffic.last_five" v-if="last.text")
+							div Текст {{last.text}}
+							div Время {{last.time}} секунд
 					v-img(v-if="text_info_modal" :src="'https://via-dolorosa.ru/static/images/t1p'+text_info_modal.current_phase_id+'.png'")
 			v-dialog.modal(v-model="modalAddPhase")
 				v-card()
@@ -176,10 +180,10 @@
 			//Получение информации о светофоре
 			async open_modal_info(e){
 				const res = await axios.get(this.server+'lights_programs/'+e)
-				console.log(res)
 				if(!res.err){
 					this.modalTrafficLights=true
 					this.infoTraffic=res.data
+					console.log(this.infoTraffic)
 					// this.open_modal_id=e
 				}
 			},
@@ -241,5 +245,16 @@
 	width: 100%;
 	border-bottom: 1px solid #999999;
 	color:#525252;
+}
+.blockAnomaly{
+	width: fit-content;
+	text-align: center;
+}
+.err{
+	border: 1px solid black;
+	border-radius: 3px;
+	padding: 2px;
+	margin-left: 10px;
+	margin-top: 10px;
 }
 </style>
