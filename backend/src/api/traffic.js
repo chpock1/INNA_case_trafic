@@ -80,8 +80,7 @@ async function awaitphase(id){//id это индекс а не значение
             for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
                 if(last_info.current_phase_id===i.id){
                     if((ping-time)>allow_delay_time) {//если время смены фазы больше положенного на allow_delay_time
-
-                        if(data.status_msg.nextPhaseID===last_info.current_phase_id){ //делаем запрос на экстренное переключение
+                        if(data.rc_response.status_msg.nextPhaseID===last_info.current_phase_id){ //делаем запрос на экстренное переключение
                             async function switchin(i){
                                 const emergency_switching= await request.requestApi('POST',arr_test_id[id]+'/forward_next_phase',[],{})//API запрос на телефон
                                 if(!emergency_switching&&i<2) switchin(i)
@@ -102,7 +101,7 @@ async function awaitphase(id){//id это индекс а не значение
                 )
                 save(arr_test_id[id],1,id)//локальное сохранение переключения
             }
-            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.status_msg.nextPhaseID){
+            if(arr_edit[id][arr_edit[id].length-1].current_phase_id!=data.rc_response.status_msg.nextPhaseID){
                 for(i of arr_program[id].phases){//перебираем фазы и находим нужную по id
                     if(last_info.current_phase_id===i.id){
                         if((time-ping)>2){//значит переключению раньше чем должно, быть, нельзя так, вычисляем сколько ещё должно быть и плюсуем
@@ -144,7 +143,7 @@ async function program_cash(save,get,data) {//функция сохранени�
     }
 }
 
-// load_programs()//запуск всех программ с интервалом запросов
+load_programs()//запуск всех программ с интервалом запросов
 
 async function detected_traffic_jam(detector_info){//поступила информация с детектора
     const plan = require('./traffic_plan/DT'+detector_info.id);//require плана для данного детектора
@@ -235,7 +234,6 @@ exports.plugin = {
                 async handler(req) {
                     const {id}=req.params
                     const data1 = await request.requestApi('GET',id+'/status',[],{})
-                    console.log(data1)
                     return data1
                 },
                 description: 'Запросить статус',
